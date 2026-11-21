@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Termografía Articular — Protocolo Anonimizado por Sujeto</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-box">IR</div>
+      <div>
+        <h1>Termografía Infrarroja Articular</h1>
+        <p class="subtitle">Protocolo Bilateral (6 Vistas) · Agrupación Anónima por Sujeto</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <span class="status-pill" id="status-pill">
+        <span class="pulse-dot"></span>
+        <span id="status-text">Verificando nodo...</span>
+      </span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Columna Izquierda: Visor en vivo + Protocolo de 6 posiciones -->
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>Sensor Térmico en Vivo</h2>
+          <span class="meta-hint" id="pose-activa-texto">Posición actual: Mano Derecha · Vista Dorsal</span>
+        </div>
+        <label class="toggle-guide">
+          <input type="checkbox" id="toggle-guia" checked />
+          <span>Silueta guía</span>
+        </label>
+      </div>
+
+      <div class="camera-stage">
+        <img id="stream-img" src="/video_feed" alt="Vista térmica en vivo" />
+        <div id="hand-guide" class="hand-guide">
+          <svg id="guide-svg" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+          <span class="guide-caption" id="guide-caption">Mano Derecha · Dorso abierto</span>
+        </div>
+      </div>
+
+      <div class="protocol-section">
+        <div class="protocol-head">
+          <label>1. Guía de posición (6 tomas por sujeto)</label>
+          <button type="button" id="btn-reset-sesion" class="link-btn">Reiniciar ciclo (0/6)</button>
+        </div>
+        <div class="poses-grid" id="poses-grid"></div>
+      </div>
+
+      <div class="panel-controls">
+        <div class="control-group">
+          <label>2. Clase diagnóstica del sujeto</label>
+          <div class="class-grid" id="class-grid">
+            <button type="button" class="class-btn active" data-tag="Sana">
+              <span class="swatch green"></span> Sana
+            </button>
+            <button type="button" class="class-btn" data-tag="Artritis">
+              <span class="swatch amber"></span> Artritis
+            </button>
+            <button type="button" class="class-btn" data-tag="Artrosis">
+              <span class="swatch red"></span> Artrosis
+            </button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="etiqueta-custom">3. Etiqueta de la toma (editable)</label>
+          <input type="text" id="etiqueta-custom" value="Sana - Der Dorsal" />
+        </div>
+
+        <button id="btn-capturar" class="btn-capture">
+          <span>Capturar Vista en <strong id="btn-sujeto-label">Sujeto_001</strong></span>
+          <kbd>Espacio</kbd>
+        </button>
+
+        <div id="toast" class="toast" role="status"></div>
+      </div>
+    </section>
+
+    <!-- Columna Derecha: Ficha anónima del sujeto + Dataset agrupado -->
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>Ficha Anónima y Dataset por Sujeto</h2>
+          <span class="meta-hint">Sin nombres ni datos personales · Carpeta por ID anónimo</span>
+        </div>
+        <div class="head-btns">
+          <button id="btn-exportar" class="btn-ghost" title="Descargar registro en CSV">Exportar CSV</button>
+          <button id="btn-refrescar" class="btn-ghost">Actualizar</button>
+        </div>
+      </div>
+
+      <!-- Ficha del sujeto actual -->
+      <div class="subject-box">
+        <div class="subject-top">
+          <div>
+            <span class="subject-badge">Carpeta activa</span>
+            <h3 id="subject-title">Sujeto_001</h3>
+          </div>
+          <button type="button" id="btn-nuevo-sujeto" class="btn-next-subject">
+            + Siguiente Sujeto
+          </button>
+        </div>
+
+        <div class="subject-fields">
+          <div class="mini-field">
+            <label for="input-sujeto">ID Anónimo</label>
+            <input type="text" id="input-sujeto" value="Sujeto_001" />
+          </div>
+          <div class="mini-field">
+            <label for="input-edad">Edad (opcional)</label>
+            <input type="number" id="input-edad" min="1" max="120" placeholder="Ej: 45" />
+          </div>
+          <div class="mini-field">
+            <label for="input-sexo">Sexo (opcional)</label>
+            <select id="input-sexo">
+              <option value="">No especificar</option>
+              <option value="F">Femenino</option>
+              <option value="M">Masculino</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <span class="kpi-label">Sujetos</span>
+          <strong id="kpi-sujetos">0</strong>
+        </div>
+        <div class="kpi green">
+          <span class="kpi-label">Sana</span>
+          <strong id="kpi-sana">0</strong>
+        </div>
+        <div class="kpi amber">
+          <span class="kpi-label">Artritis</span>
+          <strong id="kpi-artritis">0</strong>
+        </div>
+        <div class="kpi red">
+          <span class="kpi-label">Artrosis</span>
+          <strong id="kpi-artrosis">0</strong>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span class="filter-label">Filtrar:</span>
+        <button type="button" class="filter-chip active" data-filter="TODAS">Todas</button>
+        <button type="button" class="filter-chip" data-filter="Sana">Sana</button>
+        <button type="button" class="filter-chip" data-filter="Artritis">Artritis</button>
+        <button type="button" class="filter-chip" data-filter="Artrosis">Artrosis</button>
+      </div>
+
+      <!-- Carpetas agrupadas por sujeto -->
+      <div id="galeria" class="subjects-list">
+        <p class="empty-msg">Cargando registros desde la base de datos...</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
